@@ -33,7 +33,14 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
         .add_systems(Update, bevy::window::close_on_esc)
         .add_systems(Startup, setup)
-        .add_systems(FixedUpdate, (move_paddle, apply_velocity))
+        .add_systems(
+            FixedUpdate,
+            (
+                move_paddle,
+                apply_velocity,
+                ball_collision.after(apply_velocity),
+            ),
+        )
         .run();
 }
 
@@ -41,7 +48,9 @@ fn main() {
 struct Paddle;
 
 #[derive(Component)]
-struct Ball;
+struct Ball {
+    size: Vec2,
+}
 
 #[derive(Component, Deref, DerefMut)]
 struct Velocity(Vec2);
@@ -195,8 +204,11 @@ fn move_paddle(
         direction += 1.0;
     }
 
-    let x_pos =
+    let mut x_pos =
         paddle_transform.translation.x + direction * PADDLE_SPEED * time_step.delta_seconds();
+
+    x_pos = x_pos.min(RIGHT_WALL - (WALL_THICKNESS + PADDLE_SIZE.x) * 0.5);
+    x_pos = x_pos.max(LEFT_WALL + (WALL_THICKNESS + PADDLE_SIZE.x) * 0.5);
 
     paddle_transform.translation.x = x_pos;
 }
@@ -209,3 +221,5 @@ fn apply_velocity(mut query: Query<(&mut Transform, &Velocity)>, time_step: Res<
         transform.translation.y += velocity.y * delta_time;
     }
 }
+
+fn ball_collision() {}
