@@ -4,18 +4,20 @@ use bevy::{
     sprite::collide_aabb::{collide, Collision},
 };
 
+use crate::{
+    walls::{LEFT_WALL, RIGHT_WALL, WALL_THICKNESS},
+    Collider,
+};
+
 // Paddle details
 const PADDLE_START_Y: f32 = -240.0;
 const PADDLE_SIZE: Vec2 = Vec2::new(120.0, 20.0);
 const PADDLE_SPEED: f32 = 500.0;
 
-use crate::*;
-
 #[derive(Component)]
 pub struct Paddle;
 
 impl Paddle {
-    // Load texture and spawn paddle
     pub fn spawn_paddle(commands: &mut Commands, asset_server: &Res<AssetServer>) {
         // Load texture and spawn paddle
         let paddle_texture = asset_server.load("textures/paddle.png");

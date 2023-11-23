@@ -5,20 +5,11 @@ use bevy::{
     sprite::collide_aabb::{collide, Collision},
 };
 use paddle::Paddle;
+use walls::{WallBundle, BOTTOM_WALL, LEFT_WALL, RIGHT_WALL, TOP_WALL};
 
 mod ball;
 mod paddle;
-
-// Border wall
-const LEFT_WALL: f32 = -450.0;
-const RIGHT_WALL: f32 = 450.0;
-const BOTTOM_WALL: f32 = -300.0;
-const TOP_WALL: f32 = 300.0;
-
-const WALL_THICKNESS: f32 = 10.0;
-const WALL_BLOCK_WIDTH: f32 = RIGHT_WALL - LEFT_WALL;
-const WALL_BLOCK_HEIGHT: f32 = TOP_WALL - BOTTOM_WALL;
-const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
+mod walls;
 
 // Blocks
 const BLOCK_SIZE: Vec2 = Vec2::new(100.0, 30.0);
@@ -60,11 +51,11 @@ struct Collider {
     size: Vec2,
 }
 
-#[derive(Bundle)]
-struct WallBundle {
-    sprite_bundle: SpriteBundle,
-    collider: Collider,
-}
+// #[derive(Bundle)]
+// struct WallBundle {
+//     sprite_bundle: SpriteBundle,
+//     collider: Collider,
+// }
 
 #[derive(Component)]
 struct Block;
@@ -88,106 +79,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn paddle
     Paddle::spawn_paddle(&mut commands, &asset_server);
 
-    // // Load texture and spawn ball
-    // let ball_texture = asset_server.load("textures/ball.png");
-
-    // commands.spawn((
-    //     SpriteBundle {
-    //         transform: Transform {
-    //             translation: BALL_STARTING_POS,
-    //             ..default()
-    //         },
-    //         sprite: Sprite {
-    //             color: BALL_COLOR,
-    //             custom_size: Some(BALL_SIZE),
-    //             ..default()
-    //         },
-    //         texture: ball_texture,
-    //         ..default()
-    //     },
-    //     Ball { size: BALL_SIZE },
-    //     Velocity(BALL_SPEED * BALL_INIT_DIRECTION),
-    // ));
     Ball::spawn_ball(&mut commands, &asset_server);
 
-    // Spawn left wall
-    let vertical_wall_size = vec2(WALL_THICKNESS, WALL_BLOCK_HEIGHT + WALL_THICKNESS);
-    let horizontal_wall_size = vec2(WALL_BLOCK_WIDTH + WALL_THICKNESS, WALL_THICKNESS);
-
-    commands.spawn(WallBundle {
-        sprite_bundle: SpriteBundle {
-            transform: Transform {
-                translation: vec3(LEFT_WALL, 0.0, 0.0),
-                ..default()
-            },
-            sprite: Sprite {
-                color: WALL_COLOR,
-                custom_size: Some(vertical_wall_size),
-                ..default()
-            },
-            ..default()
-        },
-        collider: Collider {
-            size: vertical_wall_size,
-        },
-    });
-
-    // Spawn right wall
-    commands.spawn(WallBundle {
-        sprite_bundle: SpriteBundle {
-            transform: Transform {
-                translation: vec3(RIGHT_WALL, 0.0, 0.0),
-                ..default()
-            },
-            sprite: Sprite {
-                color: WALL_COLOR,
-                custom_size: Some(vertical_wall_size),
-                ..default()
-            },
-            ..default()
-        },
-        collider: Collider {
-            size: vertical_wall_size,
-        },
-    });
-
-    // Spawn bottom wall
-    commands.spawn(WallBundle {
-        sprite_bundle: SpriteBundle {
-            transform: Transform {
-                translation: vec3(0.0, BOTTOM_WALL, 0.0),
-                ..default()
-            },
-            sprite: Sprite {
-                color: WALL_COLOR,
-                custom_size: Some(horizontal_wall_size),
-                ..default()
-            },
-            ..default()
-        },
-        collider: Collider {
-            size: horizontal_wall_size,
-        },
-    });
-
-    // Spawn top wall
-    commands.spawn(WallBundle {
-        sprite_bundle: SpriteBundle {
-            transform: Transform {
-                translation: vec3(0.0, TOP_WALL, 0.0),
-                ..default()
-            },
-            sprite: Sprite {
-                color: WALL_COLOR,
-                custom_size: Some(horizontal_wall_size),
-                ..default()
-            },
-            ..default()
-        },
-        collider: Collider {
-            size: horizontal_wall_size,
-        },
-    });
+    // Spawn walls
+    WallBundle::spawn_walls(&mut commands);
 
     // Blocks
     let offset_x = LEFT_WALL + GAP_BETWEEN_BLOCKS_AND_SIDES + BLOCK_SIZE.x * 0.5;
@@ -258,56 +153,6 @@ fn apply_velocity(mut query: Query<(&mut Transform, &Velocity)>, time_step: Res<
         transform.translation.y += velocity.y * delta_time;
     }
 }
-
-// fn ball_collision(
-//     mut commands: Commands,
-//     mut scoreboard: ResMut<Scoreboard>,
-//     mut ball_query: Query<(&mut Velocity, &Transform, &Ball)>,
-//     collider_query: Query<(Entity, &Transform, &Collider, Option<&Block>)>,
-//     collision_sound: Res<CollisionSound>,
-// ) {
-//     for (mut ball_velocity, ball_transform, ball) in &mut ball_query {
-//         for (other_entity, transform, other, opt_block) in &collider_query {
-//             let collision = collide(
-//                 ball_transform.translation,
-//                 ball.size,
-//                 transform.translation,
-//                 other.size,
-//             );
-
-//             let mut reflect_x = false;
-//             let mut reflect_y = false;
-//             if let Some(collision) = collision {
-//                 match collision {
-//                     Collision::Left => reflect_x = ball_velocity.x > 0.0,
-//                     Collision::Right => reflect_x = ball_velocity.x < 0.0,
-//                     Collision::Top => reflect_y = ball_velocity.y < 0.0,
-//                     Collision::Bottom => reflect_y = ball_velocity.y > 0.0,
-//                     Collision::Inside => (),
-//                 }
-
-//                 if reflect_x {
-//                     ball_velocity.x *= -1.0;
-//                 }
-
-//                 if reflect_y {
-//                     ball_velocity.y *= -1.0;
-//                 }
-
-//                 if opt_block.is_some() {
-//                     commands.entity(other_entity).despawn();
-//                     scoreboard.score += 1;
-//                 }
-
-//                 // Play sound
-//                 commands.spawn(AudioBundle {
-//                     source: collision_sound.to_owned(),
-//                     settings: PlaybackSettings::DESPAWN,
-//                 });
-//             }
-//         }
-//     }
-// }
 
 fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>) {
     let mut text = query.single_mut();

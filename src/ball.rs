@@ -1,5 +1,4 @@
 use bevy::{
-    math::{vec2, vec3},
     prelude::*,
     sprite::collide_aabb::{collide, Collision},
 };
