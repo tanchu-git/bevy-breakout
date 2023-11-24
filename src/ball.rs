@@ -1,16 +1,16 @@
+use crate::{resources::Collider, Block, CollisionSound, Scoreboard, Velocity};
 use bevy::{
     prelude::*,
     sprite::collide_aabb::{collide, Collision},
 };
-
-use crate::{resources::Collider, Block, CollisionSound, Scoreboard, Velocity};
+use rand::Rng;
 
 // Ball details
 const BALL_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
 const BALL_STARTING_POS: Vec3 = Vec3::new(0.0, -50.0, 1.0);
 const BALL_SIZE: Vec2 = Vec2::new(20.0, 20.0);
 const BALL_SPEED: f32 = 400.0;
-const BALL_INIT_DIRECTION: Vec2 = Vec2::new(0.5, -0.5);
+const _BALL_INIT_DIRECTION: Vec2 = Vec2::new(0.5, -0.5);
 
 #[derive(Component)]
 pub(crate) struct Ball {
@@ -21,6 +21,9 @@ impl Ball {
     pub(crate) fn spawn_ball(commands: &mut Commands, asset_server: &Res<AssetServer>) {
         // Load texture
         let ball_texture = asset_server.load("textures/ball.png");
+
+        let mut rng = rand::thread_rng();
+        let random_direction = Vec2::new(rng.gen_range(-1.0..=1.0), -0.5);
 
         commands.spawn((
             SpriteBundle {
@@ -37,7 +40,7 @@ impl Ball {
                 ..default()
             },
             Ball { size: BALL_SIZE },
-            Velocity(BALL_SPEED * BALL_INIT_DIRECTION),
+            Velocity(BALL_SPEED * random_direction),
         ));
     }
 
