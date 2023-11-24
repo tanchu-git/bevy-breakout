@@ -3,7 +3,7 @@ use bevy::{
     sprite::collide_aabb::{collide, Collision},
 };
 
-use crate::{Block, Collider, CollisionSound, Scoreboard, Velocity};
+use crate::{resources::Collider, Block, CollisionSound, Scoreboard, Velocity};
 
 // Ball details
 const BALL_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
@@ -13,13 +13,13 @@ const BALL_SPEED: f32 = 400.0;
 const BALL_INIT_DIRECTION: Vec2 = Vec2::new(0.5, -0.5);
 
 #[derive(Component)]
-pub struct Ball {
+pub(crate) struct Ball {
     size: Vec2,
 }
 
 impl Ball {
-    pub fn spawn_ball(commands: &mut Commands, asset_server: &Res<AssetServer>) {
-        // Load texture and spawn ball
+    pub(crate) fn spawn_ball(commands: &mut Commands, asset_server: &Res<AssetServer>) {
+        // Load texture
         let ball_texture = asset_server.load("textures/ball.png");
 
         commands.spawn((
@@ -41,7 +41,7 @@ impl Ball {
         ));
     }
 
-    pub fn ball_collision(
+    pub(crate) fn ball_collision(
         mut commands: Commands,
         mut scoreboard: ResMut<Scoreboard>,
         mut ball_query: Query<(&mut Velocity, &Transform, &Ball)>,
@@ -86,7 +86,7 @@ impl Ball {
                         source: collision_sound.to_owned(),
                         settings: PlaybackSettings::DESPAWN,
                     });
-                }
+                };
             }
         }
     }

@@ -1,12 +1,8 @@
-use bevy::{
-    math::vec3,
-    prelude::*,
-    sprite::collide_aabb::{collide, Collision},
-};
+use bevy::{math::vec3, prelude::*};
 
 use crate::{
+    resources::Collider,
     walls::{LEFT_WALL, RIGHT_WALL, WALL_THICKNESS},
-    Collider,
 };
 
 // Paddle details
@@ -15,11 +11,11 @@ const PADDLE_SIZE: Vec2 = Vec2::new(120.0, 20.0);
 const PADDLE_SPEED: f32 = 500.0;
 
 #[derive(Component)]
-pub struct Paddle;
+pub(crate) struct Paddle;
 
 impl Paddle {
-    pub fn spawn_paddle(commands: &mut Commands, asset_server: &Res<AssetServer>) {
-        // Load texture and spawn paddle
+    pub(crate) fn spawn_paddle(commands: &mut Commands, asset_server: &Res<AssetServer>) {
+        // Load texture
         let paddle_texture = asset_server.load("textures/paddle.png");
 
         commands.spawn((
@@ -41,7 +37,7 @@ impl Paddle {
         ));
     }
 
-    pub fn move_paddle(
+    pub(crate) fn move_paddle(
         input: Res<Input<KeyCode>>,
         time_step: Res<Time>,
         mut query: Query<&mut Transform, With<Paddle>>,
