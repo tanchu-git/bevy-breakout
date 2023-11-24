@@ -24,10 +24,11 @@ fn main() {
         .add_systems(
             FixedUpdate,
             (
-                Paddle::move_paddle,
                 Velocity::apply_velocity,
-                Ball::ball_collision.after(Velocity::apply_velocity),
-            ),
+                Paddle::move_paddle,
+                Ball::ball_collision,
+            )
+                .chain(),
         )
         .run();
 }

@@ -12,6 +12,14 @@ const BALL_SIZE: Vec2 = Vec2::new(20.0, 20.0);
 const BALL_SPEED: f32 = 400.0;
 const _BALL_INIT_DIRECTION: Vec2 = Vec2::new(0.5, -0.5);
 
+// pub struct BallPlugin;
+
+// impl Plugin for BallPlugin {
+//     fn build(&self, app: &mut App) {
+//         app.add_systems(Startup, Ball::spawn_ball);
+//     }
+// }
+
 #[derive(Component)]
 pub(crate) struct Ball {
     size: Vec2,
